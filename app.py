@@ -2321,7 +2321,7 @@ if __name__ == '__main__':
             if not scheduler.running:
                 scheduler.start()
             create_predefined_users()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000) 
+    socketio.run(app, host='0.0.0.0', port=5000) 
 
 # --- REGISTRATION ROUTE ---
 @app.route('/register', methods=['GET', 'POST'])
