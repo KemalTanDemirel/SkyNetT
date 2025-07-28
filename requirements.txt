@@ -13,3 +13,4 @@ python-socketio==5.10.0
 eventlet==0.33.3
 Flask-Migrate==4.0.5
 Flask-APScheduler==1.12.4 
+gunicorn==21.2.0
