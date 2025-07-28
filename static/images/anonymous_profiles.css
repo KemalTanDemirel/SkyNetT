@@ -1,0 +1,43 @@
+.anonymous-profile {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.anonymous-profile.default {
+    background-color: #6c757d;
+}
+
+.anonymous-profile.red {
+    background-color: #dc3545;
+}
+
+.anonymous-profile.gray {
+    background-color: #495057;
+}
+
+.anonymous-profile.blue {
+    background-color: #0d6efd;
+}
+
+/* Profil resmi olarak kullanılacak SVG ikonlar */
+.anonymous-profile i {
+    font-size: 1.5rem;
+}
+
+/* Hover efekti */
+.anonymous-profile:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Seçili profil */
+.anonymous-profile.selected {
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+} 

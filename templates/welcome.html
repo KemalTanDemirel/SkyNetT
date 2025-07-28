@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKYNEX - Welcome</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .logo {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 2rem;
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        .continue-btn {
+            background-color: #8B0000;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 2s ease-in;
+        }
+
+        .continue-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
+        }
+
+        .continue-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                width: 150px;
+                height: 150px;
+            }
+
+            .continue-btn {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+        }
+
+        .welcome-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 60px;
+            margin-bottom: 30px;
+        }
+        .welcome-logo .logo-circle {
+            width: 200px;
+            height: 200px;
+            border-width: 6px;
+        }
+        .welcome-logo .logo-circle img {
+            width: 95%;
+            height: 95%;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-logo">
+        <span class="logo-circle">
+            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Skynex Logo">
+        </span>
+    </div>
+    <a href="{{ url_for('login') }}" class="continue-btn">Continue</a>
+
+    <script>
+        // Check if user is already logged in
+        fetch('/check_session')
+            .then(response => response.json())
+            .then(data => {
+                if (data.logged_in) {
+                    window.location.href = '/home';
+                }
+            });
+    </script>
+</body>
+</html> 

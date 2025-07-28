@@ -1,0 +1,581 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-page-container">
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>{{ group_name }}</h3>
+        </div>
+        <div class="chat-messages" id="chat-messages" data-room="{{ 'global' if group_id is none else 'group_' + group_id|string }}" data-current-user-id="{{ current_user.id }}">
+            <!-- Mesajlar buraya gelecek -->
+        </div>
+        <div class="chat-input-container">
+            <div id="rate-limit-timer" class="rate-limit-timer"></div>
+            <form id="message-form" class="chat-input-form">
+                <div class="input-group" style="position:relative;">
+                    <button type="button" class="btn btn-light emoji-btn" tabindex="-1" style="font-size: 1.5em;">😊</button>
+                    <div class="emoji-panel" style="display:none; position:absolute; bottom:60px; left:10px; background:#fff; border:1px solid #e0e0e0; border-radius:16px; padding:12px; z-index:2000; max-width:380px; max-height:220px; overflow:auto; box-shadow:0 8px 32px rgba(0,0,0,0.18); grid-template-columns: repeat(8, 1fr); gap:8px; grid-auto-rows: 36px;">
+                        <span class="emoji" style="font-size:1.5em;cursor:pointer;transition:transform .1s;">😀</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😁</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😂</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤣</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😃</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😄</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😅</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😆</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😉</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😊</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😋</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😎</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😍</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😘</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🥰</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😗</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😙</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😚</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🙂</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤗</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤩</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤔</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤨</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😐</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😑</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😶</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🙄</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😏</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😣</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😥</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😮</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤐</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😯</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😪</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😫</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🥱</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😴</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😌</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😛</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😜</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😝</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤤</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😒</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😓</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😔</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😕</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🙃</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤑</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😲</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">☹️</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🙁</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😖</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😞</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😟</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😤</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😢</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😭</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😦</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😧</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😨</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😩</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤯</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😬</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😰</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😱</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🥵</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🥶</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😳</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤪</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😵</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🥴</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😠</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😡</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤬</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😷</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤒</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤕</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤢</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤮</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🥳</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🥺</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤠</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😇</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤡</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤥</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤫</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤭</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🧐</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤓</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😈</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">👿</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">👹</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">👺</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">💀</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">👻</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">👽</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">👾</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🤖</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😺</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😸</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😹</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">��</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😼</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😽</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">🙀</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😿</span> <span class="emoji" style="font-size:1.5em;cursor:pointer;">😾</span>
+                    </div>
+                    <textarea id="message-input" name="message" class="form-control" placeholder="Mesajınızı yazın..." rows="1"></textarea>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-page-container, .chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px); /* Adjust height to account for navbar and margins */
+    padding: 0;
+    margin: 0;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--chat-bg);
+    border: 1px solid var(--chat-border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0;
+    position: relative;
+}
+
+.chat-header {
+    padding: 15px;
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--chat-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.chat-header h3 {
+    margin: 0;
+    color: var(--text-color);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px; /* Adjusted padding */
+    background-color: var(--chat-message-bg);
+    padding-bottom: 10px; /* Adjusted padding */
+    scroll-behavior: smooth;
+}
+
+.chat-input-container {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--chat-input-bg);
+    border-top: 1px solid var(--chat-border);
+    padding: 10px; /* Adjusted padding */
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+
+.rate-limit-timer {
+    text-align: center;
+    font-size: 0.9em;
+    color: #8B0000;
+    margin-bottom: 5px;
+    height: 1.2em; /* Reserve space to prevent layout shifts */
+    visibility: hidden; /* Hidden by default */
+}
+
+.chat-input-form {
+    max-width: 100%;
+    margin: 0;
+}
+
+.input-group {
+    width: 100%;
+    margin: 0;
+}
+
+.message {
+    margin-bottom: 10px; /* Adjusted margin */
+    max-width: 75%; /* Further reduced max-width */
+    display: flex;
+    align-items: flex-start;
+    gap: 8px; /* Space between profile pic and message content */
+    /* All messages flow left-to-right internally */
+    flex-direction: row;
+}
+
+.message.sent {
+    margin-left: auto; /* Align sent messages container to the right */
+    margin-right: 0; /* Remove default right margin */
+}
+
+.message.received {
+    margin-right: auto; /* Align received messages container to the left */
+    margin-left: 0; /* Remove default left margin */
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Adjusted space between role, username, and time */
+    margin-bottom: 2px; /* Adjusted margin */
+    font-size: 0.85em; /* Slightly smaller font for header */
+}
+
+.message-header img {
+    width: 28px; /* Slightly smaller profile picture */
+    height: 28px; /* Slightly smaller profile picture */
+    border-radius: 50%; /* Make profile picture circular */
+    object-fit: cover;
+    border: 1px solid var(--border-color); /* Slightly thinner border */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.message-role {
+    font-size: 0.75em; /* Smaller font for role */
+    font-weight: bold;
+    color: #8B0000;
+    padding: 1px 5px; /* Adjusted padding */
+    border-radius: 3px; /* Slightly smaller border-radius */
+    background-color: rgba(139, 0, 0, 0.1);
+}
+
+.message-username {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.message-time {
+    font-size: 0.7em; /* Smaller font for time */
+    opacity: 0.7;
+    margin-left: 5px; /* Adjusted margin */
+}
+
+.message-content {
+    padding: 8px 12px; /* Adjusted padding */
+    border-radius: 15px; /* Keep rounded corners */
+    position: relative;
+    word-break: break-word;
+    margin-top: 2px; /* Adjusted space between header and content */
+    flex-grow: 1; /* Allow content to take available space */
+    /* Ensure content does not exceed message container width minus profile pic and gap */
+    max-width: calc(100% - 36px); /* Adjusted max-width considering image width and gap */
+    font-size: 0.9em; /* Slightly smaller font for message content */
+    line-height: 1.4; /* Adjusted line height */
+}
+
+.message.sent .message-content {
+    background-color: #8B0000;
+    color: white;
+    border-radius: 15px 15px 0 15px;
+}
+
+.message.received .message-content {
+    background-color: var(--secondary-bg);
+    color: var(--text-color);
+    border-radius: 15px 15px 15px 0;
+}
+
+.message-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* Scrollbar stilleri */
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: var(--chat-bg);
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #8B0000;
+}
+
+.chat-input-form textarea {
+    resize: none;
+    overflow-y: hidden;
+    min-height: 38px;
+    max-height: 120px;
+    padding: 8px 12px;
+    line-height: 1.5;
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+<script>
+let currentRoom = '{{ "anonymous" if is_anonymous else "global" }}';
+let messageContainer = document.getElementById('chat-messages');
+let messageInput = document.getElementById('message-input');
+let messageForm = document.getElementById('message-form');
+let isConnected = false;
+
+// Rate limiting variables
+let lastGlobalMessageTime = 0; // Timestamp of the last sent global message
+const RATE_LIMIT_SECONDS = 3;
+let rateLimitTimerInterval = null; // To hold the interval timer
+const rateLimitTimerElement = document.getElementById('rate-limit-timer'); // Get the element by ID
+
+
+// Ses efektleri
+const sounds = {
+    connect: new Audio('/static/sounds/connect.mp3'),
+    message: new Audio('/static/sounds/message.mp3'),
+    disconnect: new Audio('/static/sounds/disconnect.mp3')
+};
+
+// Ses çalma fonksiyonu
+function playSound(soundName) {
+    try {
+        if (sounds[soundName]) {
+            sounds[soundName].currentTime = 0;
+            sounds[soundName].play().catch(e => console.log('Ses çalınamadı:', e));
+        }
+    } catch (e) {
+        console.log('Ses hatası:', e);
+    }
+}
+
+// Socket.IO bağlantısı
+const socket = io({
+    reconnection: true,
+    reconnectionAttempts: 10, // Daha fazla yeniden bağlanma denemesi
+    reconnectionDelay: 1000,
+    timeout: 10000 // Bağlantı zaman aşımı süresini artırıyorum
+});
+
+// Bağlantı durumu yönetimi
+socket.on('connect', function() {
+    console.log('Socket.IO bağlantısı kuruldu');
+    isConnected = true;
+    
+    // Bağlantı sesi çal
+    playSound('connect');
+    
+    // Odaya katıl
+    if (currentRoom) {
+        socket.emit('join_room', { room: currentRoom });
+    }
+});
+
+socket.on('connect_error', function(error) {
+    console.error('Socket.IO bağlantı hatası:', error);
+    // Bağlantı hatası durumunda kullanıcıya bilgi ver
+    showError('Sunucu bağlantısı kurulamadı. Lütfen sayfayı yenileyin.');
+});
+
+socket.on('disconnect', function() {
+    console.log('Socket.IO bağlantısı kesildi');
+    isConnected = false;
+    showStatus('Bağlantı kesildi, yeniden bağlanılıyor...', 'warning');
+    
+    // Bağlantı kesilme sesi çal
+    playSound('disconnect');
+});
+
+socket.on('connect_error', function(error) {
+    console.error('Bağlantı hatası:', error);
+    showStatus('Bağlantı hatası oluştu', 'danger');
+});
+
+socket.on('connection_status', function(data) {
+    console.log('Bağlantı durumu:', data);
+    if (data.status === 'connected') {
+        showStatus(`${data.username} olarak bağlandınız`, 'success');
+    }
+});
+
+// Sayfa yüklendiğinde
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+    console.log('Sayfa yüklendi, oda:', currentRoom);
+    
+    // Debug: Elementleri kontrol et
+    console.log('messageInput element:', messageInput);
+    console.log('messageForm element:', messageForm);
+    console.log('rateLimitTimerElement element:', rateLimitTimerElement); // Debug new element
+
+    // Odaya katıl
+    socket.emit('join_room', { room: currentRoom });
+    
+    // Mevcut mesajları yükle
+    loadMessages(currentRoom);
+    
+    // Mesaj gönderme formunu dinle
+    messageForm.addEventListener('submit', function(e) {
+        console.log('Submit event listener added');
+        e.preventDefault();
+        const content = messageInput.value.trim();
+        console.log('Form submit edildi, mesaj:', content);
+        console.log('Input value:', messageInput.value);
+        console.log('Hedef oda:', currentRoom);
+        
+        if (!content) {
+            console.log('Boş mesaj, gönderme iptal edildi');
+            return;
+        }
+        
+        // Socket.IO ile mesaj gönder
+        console.log('Socket.IO mesaj gönderiliyor:', { content, room: currentRoom });
+        socket.emit('send_message', {
+            content: content,
+            room: currentRoom
+        }, function(response) {
+            console.log('Socket.IO yanıtı:', response);
+            if (response && response.error) {
+                showError(response.error);
+            } else {
+                // Input'u temizle
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                messageInput.focus();
+                
+                // If message was sent to global chat, start the timer
+                if (currentRoom === 'global') {
+                    lastGlobalMessageTime = Date.now(); // Record send time
+                    startRateLimitTimer();
+                }
+            }
+        });
+    });
+
+    // Enter tuşu ile mesaj gönderme
+    messageInput.addEventListener('keydown', function(e) {
+        console.log('Keydown event listener added');
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // Enter tuşunun varsayılan davranışını engelle
+            messageForm.dispatchEvent(new Event('submit')); // Form submit olayını tetikle
+        }
+    });
+
+    // Textarea otomatik yükseklik ayarı
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    console.log('DOMContentLoaded function finished'); // Added debug log at the end
+
+    document.querySelectorAll('.emoji-panel').forEach(panel => panel.style.display = 'none'); // Tüm panelleri başta kapalı yap
+
+    document.querySelectorAll('.emoji-btn').forEach(function(btn) {
+        const inputGroup = btn.closest('.input-group');
+        const panel = inputGroup.querySelector('.emoji-panel');
+        const input = inputGroup.querySelector('textarea, input');
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Diğer açık panelleri kapat
+            document.querySelectorAll('.emoji-panel').forEach(p => { if (p !== panel) p.style.display = 'none'; });
+            panel.style.display = (panel.style.display === 'none' || !panel.style.display) ? 'grid' : 'none';
+        });
+        function handleEmojiSelect(e) {
+            let emojiSpan = e.target;
+            if (!emojiSpan.classList.contains('emoji')) {
+                emojiSpan = emojiSpan.closest('.emoji');
+            }
+            if (emojiSpan && emojiSpan.classList.contains('emoji')) {
+                if (input) {
+                    input.value += emojiSpan.textContent;
+                    input.focus();
+                }
+                panel.style.display = 'none';
+            }
+        }
+        panel.addEventListener('click', handleEmojiSelect);
+        panel.addEventListener('touchstart', handleEmojiSelect);
+        document.addEventListener('click', function(e) {
+            if (!panel.contains(e.target) && e.target !== btn) {
+                panel.style.display = 'none';
+            }
+        });
+    });
+});
+
+// Mesajları yükle
+function loadMessages(room) {
+    fetch(`/messages/${room}`)
+        .then(response => response.json())
+        .then(messages => {
+            messageContainer.innerHTML = '';
+            messages.forEach(message => {
+                appendMessage(message);
+            });
+            scrollToBottom();
+             // Update timer display based on the loaded room
+            updateTimerDisplay();
+        })
+        .catch(error => {
+            console.error('Mesaj yükleme hatası:', error);
+            showError('Mesajlar yüklenirken bir hata oluştu.');
+        });
+}
+
+// Mesajı ekrana ekle
+function appendMessage(message) {
+    const messageDiv = document.createElement('div');
+    const currentUserId = messageContainer.dataset.currentUserId; // Get current user ID from data attribute
+    messageDiv.className = `message ${message.user_id.toString() === currentUserId ? 'sent' : 'received'}`;
+    messageDiv.dataset.messageId = message.id;
+
+    const messageHtml = `
+        <img src="${message.profile_image_url || '/static/images/default.png'}" alt="Profil" class="profile-image">
+        <div class="message-info">
+            <div class="message-header">
+                ${message.role ? `<span class="message-role">${message.role}</span>` : ''}
+                <span class="message-username">${message.username || 'Bilinmiyor'}</span>
+                <span class="message-time">${message.timestamp || new Date().toLocaleString()}</span>
+            </div>
+            <div class="message-content">${message.content}</div>
+        </div>
+    `;
+
+    messageDiv.innerHTML = messageHtml;
+    messageContainer.appendChild(messageDiv);
+}
+
+// Durum mesajını göster
+function showStatus(message, type = 'info') {
+    const statusDiv = document.createElement('div');
+    statusDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    statusDiv.style.position = 'fixed';
+    statusDiv.style.top = '20px';
+    statusDiv.style.left = '50%';
+    statusDiv.style.transform = 'translateX(-50%)';
+    statusDiv.style.zIndex = '9999';
+    statusDiv.style.minWidth = '300px';
+    statusDiv.style.textAlign = 'center';
+    
+    statusDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+    `;
+    
+    document.body.appendChild(statusDiv);
+    
+    // 3 saniye sonra durum mesajını kaldır
+    setTimeout(() => {
+        statusDiv.remove();
+    }, 3000);
+}
+
+// Hata mesajını göster
+function showError(message) {
+    console.error('Hata:', message);
+    showStatus(message, 'danger');
+}
+
+// Mesajları temizle
+socket.on('clear_messages', function() {
+    messageContainer.innerHTML = '';
+});
+
+// Oda değiştiğinde
+socket.on('room_changed', function(data) {
+    currentRoom = data.room;
+    loadMessages(currentRoom);
+    // Update timer display based on the new room
+    updateTimerDisplay();
+});
+
+// En alta kaydır
+function scrollToBottom() {
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+}
+
+// Sayfa yenilendiğinde veya kapatıldığında
+window.addEventListener('beforeunload', function() {
+    socket.emit('leave_room', { room: currentRoom });
+});
+
+// Socket.IO hata dinleyicisi
+socket.on('error', function(data) {
+    console.error('Socket.IO hatası:', data); // Debug log
+    showError(data.message);
+});
+
+// Yeni mesaj geldiğinde
+socket.on('new_message', function(message) {
+    console.log('Yeni mesaj alındı:', message); // Debug log
+    appendMessage(message);
+    scrollToBottom();
+    
+    // Sistem mesajları için ses çal
+    if (message.is_system && message.system_type) {
+        if (message.system_type === 'connect') {
+            playSound('connect');
+        } else if (message.system_type === 'disconnect') {
+            playSound('disconnect');
+        }
+    }
+    // Normal mesajlar için ses çal (kendi mesajı değilse)
+    else if (message.user_id !== parseInt(document.getElementById('chat-messages').dataset.currentUserId)) {
+        playSound('message');
+    }
+});
+
+// Rate limit timer functions
+function updateTimerDisplay() {
+    const remainingTime = Math.max(0, lastGlobalMessageTime + RATE_LIMIT_SECONDS * 1000 - Date.now()) / 1000;
+    
+    if (currentRoom === 'global' && remainingTime > 0) {
+        rateLimitTimerElement.textContent = `Sonraki mesaj: ${remainingTime.toFixed(1)} saniye`;
+        rateLimitTimerElement.style.visibility = 'visible';
+    } else {
+        rateLimitTimerElement.style.visibility = 'hidden';
+    }
+}
+
+function startRateLimitTimer() {
+    if (rateLimitTimerInterval === null) {
+        rateLimitTimerInterval = setInterval(updateTimerDisplay, 100); // Update every 100ms
+    }
+    updateTimerDisplay(); // Initial update
+}
+
+// Stop the timer when leaving the global room or disconnecting
+function stopRateLimitTimer() {
+    if (rateLimitTimerInterval !== null) {
+        clearInterval(rateLimitTimerInterval);
+        rateLimitTimerInterval = null;
+        rateLimitTimerElement.style.visibility = 'hidden';
+    }
+}
+
+socket.on('disconnect', stopRateLimitTimer);
+socket.on('room_changed', function(data) {
+    currentRoom = data.room;
+    loadMessages(currentRoom);
+    if (currentRoom !== 'global') {
+        stopRateLimitTimer();
+    }
+});
+
+
+// Initial timer setup when the page loads (in DOMContentLoaded)
+// Check if we are in the global room on load and start timer if necessary
+// Moved initial timer setup inside DOMContentLoaded after loadMessages
+</script>
+{% endblock %}
+
+{% block extra_js %}
+
+{% endblock %}

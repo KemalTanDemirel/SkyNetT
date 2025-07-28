@@ -1,0 +1,50 @@
+<nav class="navbar navbar-expand-lg" style="background-color: #8B0000;">
+    <div class="container-fluid">
+        <div class="navbar-brand-container">
+            <div class="logo-box">
+                <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="SKYNEX Logo" class="navbar-logo">
+            </div>
+            <span class="navbar-brand" style="color: white;">SKYNEX</span>
+        </div>
+
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item">
+                <button class="btn btn-link nav-link" id="notificationsBtn" style="color: white;">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationCount">0</span>
+                </button>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" href="{{ url_for('home') }}" style="color: white;">Anasayfa</a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" href="{{ url_for('messages') }}" style="color: white;">Mesajlar</a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" href="{{ url_for('forum') }}" style="color: white;">Forumlar</a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" href="{{ url_for('polls') }}" style="color: white;">Anketler</a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" href="{{ url_for('confession') }}" style="color: white;">İtiraf Et</a>
+            </div>
+            <div class="nav-item">
+                <button class="btn btn-link nav-link" id="themeToggle" style="color: white;">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+            <div class="nav-item dropdown">
+                <button class="btn btn-link nav-link dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown" style="color: white;">
+                    <i class="fas fa-user"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{{ url_for('profile') }}">Profil</a></li>
+                    <li><a class="dropdown-item" href="#">Ayarlar</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('logout') }}">Çıkış Yap</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav> 

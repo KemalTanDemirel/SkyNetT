@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .landing-container {
+        min-height: calc(100vh - 76px);
+        background-color: #1a1a1a;
+        color: white;
+        padding: 40px 0;
+    }
+    .logo-container {
+        background-color: #1a1a1a;
+        border-radius: 10px;
+        padding: 20px;
+        display: inline-block;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .landing-logo {
+        max-width: 200px;
+        transition: transform 0.3s ease;
+    }
+    .logo-container:hover .landing-logo {
+        transform: scale(1.05);
+    }
+    .landing-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #007bff;
+    }
+    .landing-subtitle {
+        font-size: 1.5rem;
+        color: #b3b3b3;
+        margin-bottom: 40px;
+    }
+    .landing-buttons .btn {
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        margin: 0 10px;
+        transition: all 0.3s ease;
+    }
+    .landing-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <div class="container text-center">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="SKYNEX" class="landing-logo">
+        </div>
+        <h1 class="landing-title">Welcome to SKYNEX</h1>
+        <p class="landing-subtitle">Your secure and anonymous communication platform</p>
+        <div class="landing-buttons">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

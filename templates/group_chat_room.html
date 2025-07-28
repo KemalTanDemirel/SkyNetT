@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-page-container">
+    <div class="chat-container" id="chat-container" data-group-id="{{ group.id }}" data-current-user-id="{{ current_user.id }}">
+        <div class="chat-header">
+            <h3>{{ group.name }}</h3>
+            <span class="text-muted">{{ group.description }}</span>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-container">
+            <form id="message-form" class="chat-input-form">
+                <div class="input-group">
+                    <input type="text" id="message-input" name="message" class="form-control" placeholder="Mesajınızı yazın...">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ... önceki chat stilleri ... */
+.admin-badge {
+    background: #8B0000;
+    color: #fff;
+    font-size: 0.85em;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 2px 8px;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+.message-role {
+    font-size: 0.85em;
+    font-weight: bold;
+    margin-right: 5px;
+    color: #007bff; /* Rol rengi, isteğe göre değiştirilebilir */
+}
+
+.message-username {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.message-header img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+    object-fit: cover;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.message-content {
+    margin-left: 38px; /* Profil resmi ve başlık genişliği kadar boşluk */
+    word-break: break-word;
+}
+
+/* Kendi gönderdiğimiz mesajlar */
+.message.sent {
+    justify-content: flex-end;
+}
+
+.message.sent .message-content {
+    background-color: #007bff; /* Mavi veya farklı bir renk */
+    color: white;
+    margin-left: 0;
+    margin-right: 38px;
+}
+
+.message.sent .message-header {
+     justify-content: flex-end;
+     flex-direction: row-reverse; /* Başlık elementlerini ters çevir */
+}
+
+.message.sent .message-header img {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+.message.sent .message-role,
+.message.sent .message-username {
+    margin-left: 5px;
+    margin-right: 0;
+}
+
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/group_chat.js') }}"></script>
+{% endblock %} 

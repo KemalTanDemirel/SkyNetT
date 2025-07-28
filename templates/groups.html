@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Create Group Section -->
+        {% if current_user.can_create_groups %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Yeni Grup Oluştur</h5>
+                </div>
+                <div class="card-body">
+                    <form id="create-group-form">
+                        <div class="mb-3">
+                            <label for="group-name" class="form-label">Grup Adı</label>
+                            <input type="text" class="form-control" id="group-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="group-description" class="form-label">Açıklama</label>
+                            <textarea class="form-control" id="group-description" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is-private">
+                            <label class="form-check-label" for="is-private">Özel Grup (Katılım için onay gerekli)</label>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus-circle"></i> Grup Oluştur
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- My Groups Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> Gruplarım</h5>
+                </div>
+                <div class="card-body">
+                    <div id="my-groups-list">
+                        {% for group in user_groups %}
+                        <div class="group-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ group.name }}</h6>
+                                    <small class="text-muted">{{ group.description }}</small>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('chat', group_id=group.id) }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-comments"></i> Sohbet
+                                    </a>
+                                    {% if group.created_by == current_user.id or group.is_admin %}
+                                    <button class="btn btn-info btn-sm manage-group" data-group-id="{{ group.id }}">
+                                        <i class="fas fa-cog"></i> Yönet
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">Henüz hiçbir gruba üye değilsiniz.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Groups Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-search"></i> Katılabileceğin Gruplar</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="group-search" placeholder="Grup ara...">
+                    </div>
+                    <div id="available-groups-list">
+                        {% for group in available_groups %}
+                        {% if group not in user_groups and group.name != 'SKYNEX' %}
+                        <div class="group-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ group.name }}</h6>
+                                    <small class="text-muted">{{ group.description }}</small>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> Oluşturan: {{ group.creator.username }}
+                                    </small>
+                                </div>
+                                <div>
+                                    {% if group.is_private %}
+                                    <button class="btn btn-primary btn-sm request-join" data-group-id="{{ group.id }}">
+                                        <i class="fas fa-user-plus"></i> Katılım İste
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-success btn-sm join-group" data-group-id="{{ group.id }}">
+                                        <i class="fas fa-sign-in-alt"></i> Katıl
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <p class="text-muted">Katılabileceğin başka grup bulunmuyor.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Requests Section (for group admins) -->
+    {% if current_user.created_groups %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-clock"></i> Katılım İstekleri
+                        <span class="badge bg-primary" id="request-count">0</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="join-requests-list">
+                        <!-- Join requests will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Group Management Modal -->
+<div class="modal fade" id="groupManagementModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Grup Yönetimi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="group-management-content">
+                    <!-- Group management content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/groups.js') }}"></script>
+{% endblock %} 

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #1a1a1a !important;
+    }
+    .forum-container {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        min-height: 100vh;
+        padding: 20px 0;
+        margin-top: -56px; /* Navbar'ın yüksekliğini dengelemek için */
+    }
+    .forum-card {
+        background-color: #2d2d2d;
+        border: 1px solid #404040;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    .forum-card:hover {
+        background-color: #363636;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .forum-header {
+        background-color: #333333;
+        border-bottom: 1px solid #404040;
+    }
+    .forum-title {
+        color: #ffffff;
+    }
+    .forum-title a:hover {
+        color: #007bff !important;
+    }
+    .forum-meta {
+        color: #b3b3b3;
+    }
+    .btn-create-thread {
+        background-color: #007bff;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-create-thread:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .thread-author {
+        color: #007bff;
+    }
+    .thread-date {
+        color: #b3b3b3;
+    }
+    .badge {
+        background-color: #007bff !important;
+        transition: all 0.3s ease;
+    }
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    footer {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        border-top: 1px solid #404040;
+    }
+    .logo-container {
+        background-color: #1a1a1a;
+        border-radius: 10px;
+        padding: 20px;
+        display: inline-block;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .forum-logo {
+        height: 80px;
+        transition: transform 0.3s ease;
+    }
+    .logo-container:hover .forum-logo {
+        transform: scale(1.05);
+    }
+    .thread-title a:hover {
+        color: #007bff !important;
+    }
+    .thread-preview {
+        color: #aaa;
+        margin-top: 10px;
+        font-size: 0.95rem;
+    }
+    .thread-replies {
+        color: #888;
+    }
+    .thread-replies i {
+        margin-right: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="forum-container">
+    <div class="container">
+        <!-- Forum Header with Logo -->
+        <div class="text-center mb-4">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="SKYNEX" class="forum-logo">
+            </div>
+            <h1 class="text-light">SKYNEX Forum</h1>
+        </div>
+
+        <!-- Thread List -->
+        <div class="thread-list">
+            {% for thread in threads %}
+            <div class="thread-card">
+                <div class="thread-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="thread-title">
+                            <a href="{{ url_for('thread', thread_id=thread.id) }}" class="text-light text-decoration-none">
+                                {{ thread.title }}
+                                {% if thread.is_locked %}
+                                <i class="fas fa-lock text-danger ms-2" title="Locked Thread"></i>
+                                {% endif %}
+                            </a>
+                        </h3>
+                        <span class="thread-date">{{ thread.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <div class="thread-meta">
+                        <span class="thread-author">Posted by {{ thread.user.username }}</span>
+                        <span class="thread-replies ms-3">
+                            <i class="fas fa-comments"></i> {{ thread.replies|length }} replies
+                        </span>
+                    </div>
+                </div>
+                <div class="thread-preview">
+                    {{ thread.content[:200] }}{% if thread.content|length > 200 %}...{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- New Thread Button -->
+        <div class="text-center mt-4">
+            <a href="{{ url_for('new_thread') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus"></i> New Thread
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

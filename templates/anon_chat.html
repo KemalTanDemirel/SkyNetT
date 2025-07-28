@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Anonim Chat{% endblock %}
+
+{% block extra_css %}
+<style>
+.anon-chat-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #23272b;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    color: #fff;
+    padding: 0;
+}
+.anon-chat-messages {
+    max-height: 600px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 32px 0 32px;
+}
+.anon-message {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    background: #181a1b;
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.anon-profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 14px;
+    border: 2px solid #e74c3c;
+}
+.anon-message-content {
+    flex: 1;
+}
+.anon-message-header {
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 2px;
+}
+.anon-message-time {
+    font-size: 0.85em;
+    color: #aaa;
+    margin-left: 8px;
+}
+.anon-chat-input {
+    display: flex;
+    border-top: 1px solid #444;
+    background: #23272b;
+    padding: 18px 24px;
+    border-radius: 0 0 16px 16px;
+}
+.anon-chat-input textarea {
+    flex: 1;
+    resize: none;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #181a1b;
+    color: #fff;
+    padding: 10px;
+    margin-right: 12px;
+}
+.anon-chat-input button {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+.anon-chat-input button:hover {
+    background: #c0392b;
+}
+.anon-profile-select-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.anon-profile-select-box {
+    background: #23272b;
+    border-radius: 16px;
+    padding: 36px 32px 32px 32px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    min-width: 340px;
+    max-width: 95vw;
+    color: #fff;
+    text-align: center;
+}
+.anon-profile-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: center;
+    margin: 18px 0 12px 0;
+}
+.anon-profile-option {
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: border 0.2s, transform 0.2s;
+    width: 64px; height: 64px;
+    object-fit: cover;
+}
+.anon-profile-option.selected {
+    border: 2px solid #e74c3c;
+    transform: scale(1.08);
+}
+.anon-profile-nickname {
+    margin-bottom: 18px;
+}
+.anon-profile-select-btn {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+.anon-profile-select-btn:disabled {
+    background: #888;
+    cursor: not-allowed;
+}
+.rate-limit-timer {
+    text-align: center;
+    color: #e74c3c;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="anon-profile-modal" class="anon-profile-select-modal" style="display:none;">
+    <div class="anon-profile-select-box">
+        <h3>Anonim Chat'e Giriş</h3>
+        <div class="anon-profile-nickname">
+            <input type="text" id="anon-nickname-input" class="form-control" maxlength="20" placeholder="Bir takma ad seç..." autocomplete="off">
+        </div>
+        <div class="anon-profile-list" id="anon-profile-list">
+            <!-- Profil resimleri JS ile yüklenecek -->
+        </div>
+        <button class="anon-profile-select-btn" id="anon-profile-continue" disabled>Devam Et</button>
+    </div>
+</div>
+<div class="anon-chat-container" id="anon-chat-main" style="display:none;">
+    <div style="text-align:right; padding: 12px 24px 0 0;">
+        <button id="anon-exit-btn" class="btn btn-sm btn-danger">Çıkış</button>
+    </div>
+    <div id="anon-timer" class="rate-limit-timer" style="display:none;"></div>
+    <form class="anon-chat-input" id="anon-chat-form" autocomplete="off">
+        <textarea id="anon-message-input" rows="2" maxlength="500" placeholder="Mesajınızı yazın..." required></textarea>
+        <button type="submit">Gönder</button>
+    </form>
+    <div class="anon-chat-messages" id="anon-chat-messages">
+        <!-- Mesajlar buraya gelecek (JS ile) -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.CURRENT_USER = "{{ current_user.username }}";
+// Profil resimlerini dinamik olarak JS ile yükleyeceğiz
+const ANON_PROFILES = [
+    'profile1.png',
+    'profile2.png',
+    'profile3.png',
+    'profile4.png',
+    'profile5.png',
+    'profile6.png',
+    'profile7.png',
+    'profile8.png',
+    'profile9.png',
+    'profile10.png',
+    'profile11.png',
+    'profile12.png',
+    'profile13.png',
+    'profile14.png',
+    'profile15.png',
+    'profile16.png',
+    'profile17.png',
+    'profile18.png',
+    'profile19.png',
+    'profile20.png',
+    'profile21.png',
+    'profile22.png',
+    'profile23.png',
+    'profile24.png',
+    'profile25.png'
+];
+const ANON_PROFILE_PATH = '/static/images/anonprofiles/';
+</script>
+<script src="{{ url_for('static', filename='js/anon_chat.js') }}"></script>
+{% endblock %} 

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .skynex-title-wrapper {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 30px 0 20px 0;
+        height: 120px;
+    }
+    .skynex-bg-circle {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 120px;
+        height: 120px;
+        background: #000;
+        border-radius: 50%;
+        border: 3px solid #8B0000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        opacity: 0.18;
+        pointer-events: none;
+        user-select: none;
+    }
+    .skynex-bg-logo {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: 50%;
+        opacity: 1;
+    }
+    .skynex-center-title {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        color: #8B0000;
+        font-size: 2.2rem;
+        font-weight: bold;
+        letter-spacing: 0.15em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="skynex-title-wrapper">
+        <span class="skynex-bg-circle">
+            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Logo" class="skynex-bg-logo">
+        </span>
+        <span class="skynex-center-title">SKYNEX</span>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h2>Welcome to Skynex!</h2>
+            <p class="lead">Your secure communication platform.</p>
+            {% if not current_user.is_authenticated %}
+                <p><a href="{{ url_for('login') }}">Login</a> or <a href="{{ url_for('register') }}">Register</a> to continue.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %} 

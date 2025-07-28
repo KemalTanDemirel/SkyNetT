@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ group.name }} - Grup Yönetimi</h2>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Grup Üyeleri</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>Rol</th>
+                            <th>Katılma Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ member.user.profile_image }}" alt="Profile" class="rounded-circle me-2" style="width: 32px; height: 32px;">
+                                    {{ member.user.username }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if member.is_admin %}
+                                <span class="badge bg-primary">Admin</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Üye</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ member.joined_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                            <td>
+                                {% if member.user_id != current_user.id %}
+                                    {% if member.is_admin %}
+                                    <button class="btn btn-warning btn-sm remove-admin" data-user-id="{{ member.user_id }}">
+                                        <i class="fas fa-user-minus"></i> Admin Yetkisini Al
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-success btn-sm make-admin" data-user-id="{{ member.user_id }}">
+                                        <i class="fas fa-user-plus"></i> Admin Yap
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-danger btn-sm remove-member" data-user-id="{{ member.user_id }}">
+                                        <i class="fas fa-user-times"></i> Gruptan Çıkar
+                                    </button>
+                                {% else %}
+                                    <span class="text-muted">Kendiniz</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Grup Ayarları</h5>
+        </div>
+        <div class="card-body">
+            <form id="group-settings-form">
+                <div class="mb-3">
+                    <label for="group-description" class="form-label">Grup Açıklaması</label>
+                    <textarea class="form-control" id="group-description" rows="3">{{ group.description }}</textarea>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="is-private" {% if group.is_private %}checked{% endif %}>
+                    <label class="form-check-label" for="is-private">Özel Grup</label>
+                    <small class="form-text text-muted d-block">
+                        Özel gruplara katılım için onay gerekir.
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-primary">Ayarları Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Grup Sohbetine Git</h5>
+        </div>
+        <div class="card-body">
+             <a href="{{ url_for('chat', group_id=group.id) }}" class="btn btn-primary">
+                <i class="fas fa-comments"></i> Sohbete Git
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Make admin
+    document.querySelectorAll('.make-admin').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            if (confirm('Bu kullanıcıyı admin yapmak istediğinizden emin misiniz?')) {
+                fetch(`/group/{{ group.id }}/member/${userId}/make_admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'İşlem sırasında bir hata oluştu');
+                    }
+                });
+            }
+        });
+    });
+
+    // Remove admin
+    document.querySelectorAll('.remove-admin').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            if (confirm('Bu kullanıcının admin yetkisini almak istediğinizden emin misiniz?')) {
+                fetch(`/group/{{ group.id }}/member/${userId}/remove_admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'İşlem sırasında bir hata oluştu');
+                    }
+                });
+            }
+        });
+    });
+
+    // Remove member
+    document.querySelectorAll('.remove-member').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            if (confirm('Bu kullanıcıyı gruptan çıkarmak istediğinizden emin misiniz?')) {
+                fetch(`/group/{{ group.id }}/member/${userId}/remove`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'İşlem sırasında bir hata oluştu');
+                    }
+                });
+            }
+        });
+    });
+
+    // Group settings
+    document.getElementById('group-settings-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const description = document.getElementById('group-description').value;
+        const isPrivate = document.getElementById('is-private').checked;
+
+        fetch(`/group/{{ group.id }}/settings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                description: description,
+                is_private: isPrivate
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Grup ayarları güncellendi');
+            } else {
+                alert(data.error || 'Ayarlar güncellenirken bir hata oluştu');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

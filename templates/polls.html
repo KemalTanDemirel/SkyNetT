@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Anketler - SKYNEX{% endblock %}
+
+{% block extra_css %}
+<style>
+.poll-create-container {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 24px;
+    background: #23272b;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    color: #fff;
+}
+.poll-list-container {
+    max-width: 700px;
+    margin: 40px auto;
+}
+.poll-card {
+    background: #181a1b;
+    border-radius: 12px;
+    margin-bottom: 32px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.poll-question {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #e74c3c;
+}
+.poll-options {
+    margin-top: 18px;
+}
+.poll-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: #23272b;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.poll-option:hover {
+    background: #2c3136;
+}
+.poll-voters {
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.poll-voter-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e74c3c;
+}
+.poll-create-btn {
+    margin-top: 18px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Anketler</h2>
+    {% if can_create %}
+    <div class="poll-create-container mb-5">
+        <h4 class="mb-3">Yeni Anket Oluştur</h4>
+        <form method="POST" action="{{ url_for('polls') }}">
+            <div class="mb-3">
+                <label for="question" class="form-label">Soru</label>
+                <input type="text" class="form-control" id="question" name="question" maxlength="255" required>
+            </div>
+            <div id="options-container">
+                <label class="form-label">Seçenekler</label>
+                <input type="text" class="form-control mb-2" name="options" placeholder="Seçenek 1" required>
+                <input type="text" class="form-control mb-2" name="options" placeholder="Seçenek 2" required>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addOption()">+ Seçenek Ekle</button>
+            <button type="submit" class="btn btn-primary poll-create-btn">Anket Oluştur</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center mb-4">Bugün zaten bir anket oluşturdunuz. Yarın tekrar deneyebilirsiniz.</div>
+    {% endif %}
+
+    <div class="poll-list-container">
+        {% for item in poll_data %}
+        <div class="poll-card">
+            <div class="poll-question">{{ item.poll.question }}</div>
+            <div class="text-muted mb-2" style="font-size:0.95em;">Oluşturan: {{ item.poll.creator.username }} | {{ item.poll.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+            <form method="POST" action="{{ url_for('vote_poll') }}">
+                <input type="hidden" name="poll_id" value="{{ item.poll.id }}">
+                <div class="poll-options">
+                    {% for option in item.options %}
+                    <div class="poll-option">
+                        <input type="radio" name="option_id" value="{{ option.id }}" id="option{{ option.id }}" {% if item.user_voted %}disabled{% endif %} required>
+                        <label for="option{{ option.id }}" class="ms-2 mb-0">{{ option.text }}</label>
+                        <div class="poll-voters">
+                            {% for voter in item.option_votes[option.id] %}
+                                <img src="{{ voter.profile_image_url or url_for('static', filename='images/default.png') }}" class="poll-voter-img" title="{{ voter.username }}">
+                            {% endfor %}
+                        </div>
+                        <span class="badge bg-secondary ms-2">{{ item.option_votes[option.id]|length }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if not item.user_voted %}
+                <button type="submit" class="btn btn-success btn-sm mt-2">Oy Ver</button>
+                {% else %}
+                <div class="alert alert-success mt-2 py-1 px-2" style="font-size:0.95em;">Bu ankete oy verdiniz.</div>
+                {% endif %}
+            </form>
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center">Henüz anket yok.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function addOption() {
+    const container = document.getElementById('options-container');
+    const count = container.querySelectorAll('input[name="options"]').length + 1;
+    if(count > 8) return; // Maksimum 8 seçenek
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control mb-2';
+    input.name = 'options';
+    input.placeholder = `Seçenek ${count}`;
+    input.required = true;
+    container.appendChild(input);
+}
+</script>
+{% endblock %} 

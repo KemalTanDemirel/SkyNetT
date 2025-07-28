@@ -1,0 +1,645 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Kullanıcı Yönetimi -->
+        <div class="col-md-6 mb-4">
+            <div class="card admin-card">
+                <div class="card-header">
+                    <h3 class="admin-title">Kullanıcı Yönetimi</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="admin-text">Kullanıcı Adı</th>
+                                    <th class="admin-text">E-posta</th>
+                                    <th class="admin-text">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td class="admin-text">{{ user.username }}</td>
+                                    <td class="admin-text">{{ user.email }}</td>
+                                    <td>
+                                        {% if not (user.role == 'NEXUS' and current_user.role != 'NEXUS') %}
+                                        <div class="btn-group">
+                                            {% if current_user.role == 'NEXUS' or (current_user.role in ['admin', 'RYDER', 'COBRA', 'DİABLO'] and user.role not in ['admin', 'NEXUS', 'RYDER', 'COBRA', 'DİABLO']) %}
+                                            <button class="btn btn-info btn-sm admin-btn" onclick="showRoleModal({{ user.id }})">
+                                                <i class="fas fa-user-tag"></i> Rol Değiştir
+                                            </button>
+                                            {% endif %}
+                                            
+                                            {% if user.is_banned %}
+                                            <button class="btn btn-success btn-sm admin-btn" onclick="adminAction({{ user.id }}, 'unban')">
+                                                <i class="fas fa-unlock"></i> Yasak Kaldır
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-danger btn-sm admin-btn" onclick="showBanModal({{ user.id }})">
+                                                <i class="fas fa-ban"></i> Yasakla
+                                            </button>
+                                            {% endif %}
+                                            
+                                            {% if user.is_muted %}
+                                            <button class="btn btn-success btn-sm admin-btn" onclick="adminAction({{ user.id }}, 'unmute')">
+                                                <i class="fas fa-microphone"></i> Susturmayı Kaldır
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-warning btn-sm admin-btn" onclick="showMuteModal({{ user.id }})">
+                                                <i class="fas fa-microphone-slash"></i> Sustur
+                                            </button>
+                                            {% endif %}
+                                            
+                                            {% if current_user.role in ['admin', 'NEXUS', 'RYDER', 'COBRA', 'DİABLO'] %}
+                                                {% if user.can_create_groups %}
+                                                <button class="btn btn-warning btn-sm admin-btn" onclick="adminAction({{ user.id }}, 'revoke_group_creation')">
+                                                    <i class="fas fa-times-circle"></i> Grup Yetkisini Al
+                                                </button>
+                                                {% else %}
+                                                <button class="btn btn-info btn-sm admin-btn" onclick="adminAction({{ user.id }}, 'grant_group_creation')">
+                                                    <i class="fas fa-check-circle"></i> Grup Yetkisi Ver
+                                                </button>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                        {% else %}
+                                        <span class="badge bg-danger">{{ user.role }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grup Yönetimi -->
+        <div class="col-md-6 mb-4">
+            <div class="card admin-card">
+                <div class="card-header">
+                    <h3 class="admin-title">Grup Yönetimi</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="admin-text">Grup Adı</th>
+                                    <th class="admin-text">Üye Sayısı</th>
+                                    <th class="admin-text">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for group in groups %}
+                                <tr>
+                                    <td class="admin-text">{{ group.name }}</td>
+                                    <td class="admin-text">{{ group.members.count() }}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm admin-btn" onclick="showGroupMembers({{ group.id }})">
+                                            <i class="fas fa-users"></i> Üyeleri Yönet
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grup Üyeleri Modal -->
+<div class="modal fade" id="groupMembersModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Grup Üyeleri</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="userSearchInput" placeholder="Kullanıcı ara...">
+                        <button class="btn btn-primary" onclick="searchUsers()">Ara</button>
+                    </div>
+                </div>
+                <div id="searchResults" class="mb-3" style="display: none;">
+                    <!-- Arama sonuçları buraya gelecek -->
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı</th>
+                                <th>Katılma Tarihi</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersList">
+                            <!-- Üyeler buraya dinamik olarak yüklenecek -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ban Modal -->
+<div class="modal fade" id="banModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kullanıcıyı Yasakla</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="banForm">
+                    <input type="hidden" id="banUserId" name="user_id">
+                    <div class="mb-3">
+                        <label for="banDuration" class="form-label">Yasaklama Süresi (Gün)</label>
+                        <input type="number" class="form-control" id="banDuration" name="duration" min="1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-danger" onclick="submitBan()">Yasakla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mute Modal -->
+<div class="modal fade" id="muteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content admin-modal">
+            <div class="modal-header">
+                <h5 class="modal-title admin-text">Kullanıcıyı Sustur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="muteForm">
+                    <input type="hidden" id="muteUserId">
+                    <div class="mb-3">
+                        <label for="muteDuration" class="form-label admin-text">Susturma Süresi (Gün)</label>
+                        <input type="number" class="form-control" id="muteDuration" min="1" value="1">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-warning" onclick="submitMute()">Sustur</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Role Modal -->
+<div class="modal fade" id="roleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content admin-modal">
+            <div class="modal-header">
+                <h5 class="modal-title admin-text">Kullanıcı Rolünü Değiştir</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="roleForm">
+                    <input type="hidden" id="roleUserId">
+                    <div class="mb-3">
+                        <label for="userRole" class="form-label admin-text">Yeni Rol</label>
+                        <select class="form-select" id="userRole" required>
+                            <option value="user">Normal Kullanıcı</option>
+                            <option value="helper_admin">Yardımcı Admin</option>
+                            {% if current_user.role == 'NEXUS' %}
+                            <option value="admin">Admin</option>
+                            <option value="NEXUS">NEXUS</option>
+                            <option value="RYDER">RYDER</option>
+                            <option value="COBRA">COBRA</option>
+                            <option value="DİABLO">DİABLO</option>
+                            {% elif current_user.role in ['admin', 'RYDER', 'COBRA', 'DİABLO'] %}
+                            <option value="admin">Admin</option>
+                            <option value="RYDER">RYDER</option>
+                            <option value="COBRA">COBRA</option>
+                            <option value="DİABLO">DİABLO</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="submitRole()">Rolü Değiştir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-card {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-title {
+    color: #8B0000 !important;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-text {
+    color: #8B0000 !important;
+}
+
+.admin-btn {
+    margin: 2px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.admin-btn:active {
+    transform: translateY(0);
+}
+
+.admin-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.admin-btn:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+.admin-modal {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+}
+
+.admin-modal .modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-modal .modal-title {
+    color: #8B0000 !important;
+}
+
+.table {
+    color: var(--text-color);
+}
+
+.table thead th {
+    border-bottom: 2px solid var(--border-color);
+    background-color: var(--secondary-bg);
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: var(--secondary-bg);
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
+}
+
+/* Tema değişkenleri */
+:root {
+    --bg-color: #ffffff;
+    --secondary-bg: #f8f9fa;
+    --text-color: #212529;
+    --border-color: #dee2e6;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --secondary-bg: #2d2d2d;
+    --text-color: #e4e6eb;
+    --border-color: #404040;
+}
+</style>
+
+<script>
+function adminAction(userId, action) {
+    let confirmMessage = '';
+    let shouldConfirm = true;
+    
+    switch(action) {
+        case 'unban':
+            confirmMessage = 'Kullanıcının yasağını kaldırmak istediğinize emin misiniz?';
+            break;
+        case 'unmute':
+            confirmMessage = 'Kullanıcının susturmasını kaldırmak istediğinize emin misiniz?';
+            break;
+        case 'grant_group_creation':
+            confirmMessage = 'Kullanıcıya grup oluşturma yetkisi vermek istediğinize emin misiniz?';
+            break;
+        case 'revoke_group_creation':
+            confirmMessage = 'Kullanıcının grup oluşturma yetkisini almak istediğinize emin misiniz?';
+            break;
+        default:
+            shouldConfirm = false;
+    }
+    
+    if (!shouldConfirm || confirm(confirmMessage)) {
+        fetch(`/admin/user/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `action=${action}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.error || 'Bir hata oluştu');
+            }
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            alert('İşlem sırasında bir hata oluştu');
+        });
+    }
+}
+
+function showBanModal(userId) {
+    document.getElementById('banUserId').value = userId;
+    new bootstrap.Modal(document.getElementById('banModal')).show();
+}
+
+function showMuteModal(userId) {
+    document.getElementById('muteUserId').value = userId;
+    new bootstrap.Modal(document.getElementById('muteModal')).show();
+}
+
+function submitBan() {
+    const userId = document.getElementById('banUserId').value;
+    const duration = document.getElementById('banDuration').value;
+    
+    if (!duration || duration < 1) {
+        alert('Lütfen geçerli bir süre girin (en az 1 gün)');
+        return;
+    }
+    
+    fetch(`/admin/user/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `action=ban&duration=${duration}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.error || 'Bir hata oluştu');
+        }
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        alert('İşlem sırasında bir hata oluştu');
+    });
+}
+
+function submitMute() {
+    const userId = document.getElementById('muteUserId').value;
+    const duration = document.getElementById('muteDuration').value;
+    
+    if (!duration || duration < 1) {
+        alert('Lütfen geçerli bir süre girin (en az 1 gün)');
+        return;
+    }
+    
+    fetch(`/admin/user/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `action=mute&duration=${duration}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.error || 'Bir hata oluştu');
+        }
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        alert('İşlem sırasında bir hata oluştu');
+    });
+}
+
+function showGroupMembers(groupId) {
+    document.getElementById('currentGroupId').value = groupId;
+    
+    fetch(`/admin/group/${groupId}/members`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modal = document.getElementById('groupMembersModal');
+                const modalTitle = modal.querySelector('.modal-title');
+                const membersList = document.getElementById('membersList');
+                
+                modalTitle.textContent = `${data.group_name} - Üyeler`;
+                
+                let html = '';
+                data.members.forEach(member => {
+                    html += `
+                        <tr>
+                            <td>${member.username}</td>
+                            <td>${member.joined_at}</td>
+                            <td>${member.is_admin ? 'Yönetici' : 'Üye'}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    ${member.is_admin ? 
+                                        `<button class="btn btn-warning" onclick="manageGroupMember(${groupId}, ${member.id}, 'remove_admin')">Yöneticiliği Al</button>` :
+                                        `<button class="btn btn-success" onclick="manageGroupMember(${groupId}, ${member.id}, 'make_admin')">Yönetici Yap</button>`
+                                    }
+                                    <button class="btn btn-danger" onclick="manageGroupMember(${groupId}, ${member.id}, 'remove_member')">Gruptan Çıkar</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                membersList.innerHTML = html;
+                new bootstrap.Modal(modal).show();
+            } else {
+                alert('Grup üyeleri listelenirken bir hata oluştu: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            alert('Grup üyeleri listelenirken bir hata oluştu');
+        });
+}
+
+function manageGroupMember(groupId, userId, action) {
+    if (!confirm('Bu işlemi gerçekleştirmek istediğinizden emin misiniz?')) {
+        return;
+    }
+    
+    fetch(`/admin/group/${groupId}/member/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `action=${action}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            showGroupMembers(groupId); // Listeyi yenile
+        } else {
+            alert('İşlem başarısız: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        alert('İşlem sırasında bir hata oluştu');
+    });
+}
+
+function showRoleModal(userId) {
+    document.getElementById('roleUserId').value = userId;
+    new bootstrap.Modal(document.getElementById('roleModal')).show();
+}
+
+function submitRole() {
+    const userId = document.getElementById('roleUserId').value;
+    const role = document.getElementById('userRole').value;
+    
+    fetch(`/admin/user/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `action=change_role&role=${role}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.error || 'Bir hata oluştu');
+        }
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        alert('İşlem sırasında bir hata oluştu');
+    });
+}
+
+function searchUsers() {
+    const searchInput = document.getElementById('userSearchInput').value.trim();
+    if (!searchInput) return;
+    
+    fetch(`/search_users?query=${encodeURIComponent(searchInput)}`)
+        .then(response => response.json())
+        .then(data => {
+            const searchResults = document.getElementById('searchResults');
+            if (data.users && data.users.length > 0) {
+                let html = '<div class="list-group">';
+                data.users.forEach(user => {
+                    html += `
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>${user.username}</span>
+                            <button class="btn btn-sm btn-primary" onclick="addUserToGroup(${user.id})">
+                                Gruba Ekle
+                            </button>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                searchResults.innerHTML = html;
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.innerHTML = '<div class="alert alert-info">Kullanıcı bulunamadı</div>';
+                searchResults.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            alert('Kullanıcı arama sırasında bir hata oluştu');
+        });
+}
+
+function addUserToGroup(userId) {
+    const groupId = document.getElementById('currentGroupId').value;
+    
+    fetch(`/admin/group/${groupId}/add_user`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `user_id=${userId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            showGroupMembers(groupId); // Listeyi yenile
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('userSearchInput').value = '';
+        } else {
+            alert(data.error || data.message || 'Bir hata oluştu');
+        }
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        alert('Kullanıcı eklenirken bir hata oluştu');
+    });
+}
+</script>
+{% endblock %} 

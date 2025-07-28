@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Thread Header -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>{{ thread.title }}</h2>
+            {% if current_user.id == thread.user_id or current_user.role == 'admin' %}
+            <form action="{{ url_for('lock_forum', id=thread.id) }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-warning">
+                    {% if thread.is_locked %}
+                    <i class="fas fa-lock"></i> Unlock Thread
+                    {% else %}
+                    <i class="fas fa-unlock"></i> Lock Thread
+                    {% endif %}
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-start mb-3">
+                {% if author.profile_image_url %}
+                <img src="{{ author.profile_image_url }}" alt="{{ author.username }}" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/default_profile.png') }}" alt="Default Profile" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                {% endif %}
+                <div>
+                    <h5 class="card-title">{{ author.username }}</h5>
+                    <p class="card-text text-muted">{{ thread.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <p class="card-text">{{ thread.content }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Posts -->
+    <h3 class="mb-3">Replies</h3>
+    {% for post in posts %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex align-items-start">
+                {% if post.author.profile_image_url %}
+                <img src="{{ post.author.profile_image_url }}" alt="{{ post.author.username }}" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/default_profile.png') }}" alt="Default Profile" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                {% endif %}
+                <div>
+                    <h5 class="card-title">{{ post.author.username }}</h5>
+                    <p class="card-text text-muted">{{ post.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <p class="card-text">{{ post.content }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Reply Form -->
+    {% if not thread.is_locked %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Post a Reply</h4>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('reply_to_forum', id=thread.id) }}" method="POST">
+                <div class="mb-3">
+                    <textarea name="content" class="form-control" rows="4" required placeholder="Write your reply here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Post Reply</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning mt-4">
+        <i class="fas fa-lock"></i> This thread is locked. No new replies can be posted.
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

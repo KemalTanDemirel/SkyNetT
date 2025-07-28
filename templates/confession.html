@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}İtiraf Et{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Anonim İtiraflar</h2>
+    {% if not existing %}
+    <form method="POST" class="mb-4">
+        <div class="mb-3">
+            <textarea class="form-control" name="content" rows="3" maxlength="500" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger">İtiraf Et</button>
+    </form>
+    {% else %}
+    <div class="alert alert-info">Bugün zaten bir itiraf gönderdiniz.</div>
+    {% endif %}
+    <hr>
+    <h4>Son İtiraflar</h4>
+    <div class="list-group">
+        {% for confession in confessions %}
+        <div class="list-group-item mb-2">
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ url_for('static', filename='images/default.png') }}" alt="Anonim" width="48" height="48" class="rounded-circle me-3">
+                <div>
+                    <strong>Anonim</strong>
+                    <span class="text-muted" style="font-size:0.9em;">{{ confession.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                </div>
+            </div>
+            <div>{{ confession.content | e }}</div>
+        </div>
+        {% else %}
+        <div class="text-muted">Henüz hiç itiraf yok.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

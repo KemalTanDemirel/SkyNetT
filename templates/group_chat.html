@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-page-container">
+    <div class="row">
+        <!-- Grup Listesi -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Gruplarım</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for group in groups %}
+                        {% if group.name != 'SKYNEX' %}
+                        <a href="#" class="list-group-item list-group-item-action group-item" 
+                           data-group-id="{{ group.id }}" data-group-name="{{ group.name }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ group.name }}</h5>
+                                    <small class="text-muted">{{ group.description }}</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{ group.members|length }}</span>
+                            </div>
+                        </a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sohbet Alanı -->
+        <div class="col-md-9">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h3 id="current-group-name">Bir grup seçin</h3>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Mesajlar buraya gelecek -->
+                </div>
+                <div class="chat-input-container">
+                    <form id="message-form" class="chat-input-form">
+                        <div class="input-group">
+                            <button type="button" id="emoji-btn" class="btn btn-light" tabindex="-1" style="font-size: 1.5em;">😊</button>
+                            <div id="emoji-panel" style="display:none; position:absolute; bottom:60px; left:10px; background:#fff; border:1px solid #ccc; border-radius:10px; padding:10px; z-index:2000; max-width:350px; max-height:200px; overflow:auto; box-shadow:0 2px 10px rgba(0,0,0,0.15);">
+                                <span class="emoji">😀</span> <span class="emoji">😁</span> <span class="emoji">😂</span> <span class="emoji">🤣</span> <span class="emoji">😃</span> <span class="emoji">😄</span> <span class="emoji">😅</span> <span class="emoji">😆</span> <span class="emoji">😉</span> <span class="emoji">😊</span> <span class="emoji">😋</span> <span class="emoji">😎</span> <span class="emoji">😍</span> <span class="emoji">😘</span> <span class="emoji">🥰</span> <span class="emoji">😗</span> <span class="emoji">😙</span> <span class="emoji">😚</span> <span class="emoji">🙂</span> <span class="emoji">🤗</span> <span class="emoji">🤩</span> <span class="emoji">🤔</span> <span class="emoji">🤨</span> <span class="emoji">😐</span> <span class="emoji">😑</span> <span class="emoji">😶</span> <span class="emoji">🙄</span> <span class="emoji">😏</span> <span class="emoji">😣</span> <span class="emoji">😥</span> <span class="emoji">😮</span> <span class="emoji">🤐</span> <span class="emoji">😯</span> <span class="emoji">😪</span> <span class="emoji">😫</span> <span class="emoji">🥱</span> <span class="emoji">😴</span> <span class="emoji">😌</span> <span class="emoji">😛</span> <span class="emoji">😜</span> <span class="emoji">😝</span> <span class="emoji">🤤</span> <span class="emoji">😒</span> <span class="emoji">😓</span> <span class="emoji">😔</span> <span class="emoji">😕</span> <span class="emoji">🙃</span> <span class="emoji">🤑</span> <span class="emoji">😲</span> <span class="emoji">☹️</span> <span class="emoji">🙁</span> <span class="emoji">😖</span> <span class="emoji">😞</span> <span class="emoji">😟</span> <span class="emoji">😤</span> <span class="emoji">😢</span> <span class="emoji">😭</span> <span class="emoji">😦</span> <span class="emoji">😧</span> <span class="emoji">😨</span> <span class="emoji">😩</span> <span class="emoji">🤯</span> <span class="emoji">😬</span> <span class="emoji">😰</span> <span class="emoji">😱</span> <span class="emoji">🥵</span> <span class="emoji">🥶</span> <span class="emoji">😳</span> <span class="emoji">🤪</span> <span class="emoji">😵</span> <span class="emoji">🥴</span> <span class="emoji">😠</span> <span class="emoji">😡</span> <span class="emoji">🤬</span> <span class="emoji">😷</span> <span class="emoji">🤒</span> <span class="emoji">🤕</span> <span class="emoji">🤢</span> <span class="emoji">🤮</span> <span class="emoji">🥳</span> <span class="emoji">🥺</span> <span class="emoji">🤠</span> <span class="emoji">😇</span> <span class="emoji">🤡</span> <span class="emoji">🤥</span> <span class="emoji">🤫</span> <span class="emoji">🤭</span> <span class="emoji">🧐</span> <span class="emoji">🤓</span> <span class="emoji">😈</span> <span class="emoji">👿</span> <span class="emoji">👹</span> <span class="emoji">👺</span> <span class="emoji">💀</span> <span class="emoji">👻</span> <span class="emoji">👽</span> <span class="emoji">👾</span> <span class="emoji">🤖</span> <span class="emoji">😺</span> <span class="emoji">😸</span> <span class="emoji">😹</span> <span class="emoji">😻</span> <span class="emoji">😼</span> <span class="emoji">😽</span> <span class="emoji">🙀</span> <span class="emoji">😿</span> <span class="emoji">😾</span>
+                            </div>
+                            <input type="text" id="message-input" name="message" class="form-control" 
+                                   placeholder="Mesajınızı yazın..." disabled>
+                            <button type="submit" class="btn btn-primary" disabled>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-page-container {
+    height: 100vh;
+    min-height: 100vh;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.card {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    height: 100%;
+}
+
+.card-header {
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--chat-border);
+}
+
+.card-header h4 {
+    margin: 0;
+    color: var(--text-color);
+}
+
+.list-group-item {
+    background-color: var(--bg-color);
+    border-color: var(--border-color);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.list-group-item:hover {
+    background-color: var(--secondary-bg);
+}
+
+.list-group-item.active {
+    background-color: #8B0000;
+    border-color: #8B0000;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--chat-bg);
+    border: 1px solid var(--chat-border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0;
+    height: 100%;
+    min-height: 0;
+    position: relative;
+}
+
+.chat-container:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chat-header {
+    padding: 15px;
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--chat-border);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chat-header h3 {
+    margin: 0;
+    color: var(--text-color);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    background-color: var(--chat-message-bg);
+    padding-bottom: 90px;
+    scroll-behavior: smooth;
+}
+
+.chat-input-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    max-width: 100vw;
+    padding: 15px 10vw 15px 10vw;
+    background-color: var(--chat-input-bg);
+    border-top: 1px solid var(--chat-border);
+    border-radius: 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+@media (max-width: 900px) {
+    .chat-input-container {
+        padding: 10px 2vw 10px 2vw;
+    }
+}
+
+.chat-input-container:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.message {
+    margin-bottom: 15px;
+    max-width: 80%;
+    animation: messageAppear 0.3s ease;
+    transition: transform 0.2s ease;
+}
+
+.message:hover {
+    transform: translateX(5px);
+}
+
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-content {
+    padding: 10px 15px;
+    border-radius: 15px;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.message.sent .message-content {
+    background-color: #8B0000;
+    color: white;
+    border-radius: 15px 15px 0 15px;
+    box-shadow: 0 2px 5px rgba(139, 0, 0, 0.2);
+}
+
+.message.received .message-content {
+    background-color: var(--secondary-bg);
+    color: var(--text-color);
+    border-radius: 15px 15px 15px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    flex-direction: row;
+}
+
+.message-header img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 8px;
+    order: 1;
+    border: 2px solid var(--border-color);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.message-header img:hover {
+    transform: scale(1.1);
+    border-color: #8B0000;
+}
+
+.message-username {
+    font-weight: bold;
+    color: var(--text-color);
+    order: 2;
+    transition: color 0.3s ease;
+}
+
+.message-time {
+    font-size: 0.8em;
+    opacity: 0.7;
+    margin-left: 8px;
+    order: 3;
+}
+
+.btn-primary {
+    background-color: #8B0000;
+    border-color: #8B0000;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary:hover {
+    background-color: #6B0000;
+    border-color: #6B0000;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(139, 0, 0, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.btn-primary:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
+}
+
+/* Tema değişkenleri */
+:root {
+    --bg-color: #ffffff;
+    --secondary-bg: #f8f9fa;
+    --text-color: #212529;
+    --border-color: #dee2e6;
+    --chat-bg: #ffffff;
+    --chat-message-bg: #f8f9fa;
+    --chat-input-bg: #ffffff;
+    --chat-border: #dee2e6;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --secondary-bg: #2d2d2d;
+    --text-color: #e4e6eb;
+    --border-color: #404040;
+    --chat-bg: #1a1a1a;
+    --chat-message-bg: #2d2d2d;
+    --chat-input-bg: #2d2d2d;
+    --chat-border: #404040;
+}
+
+/* Scrollbar stilleri */
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: var(--secondary-bg);
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #8B0000;
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #6B0000;
+}
+</style>
+
+<script>
+// Ses efektleri
+const sounds = {
+    connect: new Audio('/static/sounds/connect.mp3'),
+    message: new Audio('/static/sounds/message.mp3'),
+    disconnect: new Audio('/static/sounds/disconnect.mp3')
+};
+
+// Ses çalma fonksiyonu
+function playSound(soundName) {
+    try {
+        if (sounds[soundName]) {
+            sounds[soundName].currentTime = 0;
+            sounds[soundName].play().catch(e => console.log('Ses çalınamadı:', e));
+        }
+    } catch (e) {
+        console.log('Ses hatası:', e);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const socket = io();
+    const messagesDiv = document.getElementById('chat-messages');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const submitButton = messageForm.querySelector('button[type="submit"]');
+    const currentGroupName = document.getElementById('current-group-name');
+    let currentGroupId = null;
+
+    // Grup seçimi
+    document.querySelectorAll('.group-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Aktif grup stilini güncelle
+            document.querySelectorAll('.group-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Grup bilgilerini güncelle
+            currentGroupId = this.dataset.groupId;
+            currentGroupName.textContent = this.dataset.groupName;
+            
+            // Mesaj giriş alanını aktifleştir
+            messageInput.disabled = false;
+            submitButton.disabled = false;
+            
+            // Önceki mesajları temizle
+            messagesDiv.innerHTML = '';
+            
+            // Yeni gruba katıl
+            socket.emit('join_room', { room: `group_${currentGroupId}` });
+            console.log('Gruba katılma isteği gönderildi:', `group_${currentGroupId}`);
+            
+            // Grup mesajlarını yükle
+            fetch(`/messages/group_${currentGroupId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(messages => {
+                    console.log('Gelen mesajlar:', messages);
+                    if (Array.isArray(messages)) {
+                        messages.forEach(message => addMessage(message));
+                        scrollToBottom();
+                    } else {
+                        console.error('Invalid messages format:', messages);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading messages:', error);
+                });
+        });
+    });
+
+    // Mesaj gönderme
+    function sendMessage() {
+        if (!currentGroupId) {
+            console.error('No group selected');
+            return;
+        }
+        
+        const message = messageInput.value.trim();
+        if (message) {
+            console.log('Mesaj gönderiliyor:', {
+                content: message,
+                room: `group_${currentGroupId}`
+            });
+            
+            // Mesajı HTTP POST ile gönder
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `content=${encodeURIComponent(message)}&room=${encodeURIComponent(`group_${currentGroupId}`)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Mesaj başarıyla gönderildi');
+                    messageInput.value = '';
+                } else {
+                    console.error('Mesaj gönderme hatası:', data.error);
+                    alert(data.error || 'Mesaj gönderilirken bir hata oluştu');
+                }
+            })
+            .catch(error => {
+                console.error('Mesaj gönderme hatası:', error);
+                alert('Mesaj gönderilirken bir hata oluştu');
+            });
+        }
+    }
+
+    // Form submit
+    messageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        sendMessage();
+    });
+
+    // Enter tuşu ile mesaj gönderme
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Yeni mesaj alma
+    socket.on('new_message', function(message) {
+        console.log('Yeni mesaj alındı:', message);
+        if (message.room === `group_${currentGroupId}`) {
+            addMessage(message);
+            scrollToBottom();
+            
+            // Mesaj sesi çal (kendi mesajı değilse)
+            if (message.user_id !== {{ current_user.id }}) {
+                playSound('message');
+            }
+        }
+    });
+
+    // Mesaj ekleme fonksiyonu
+    function addMessage(message) {
+        console.log('Mesaj ekleniyor:', message);
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ' + (message.user_id === {{ current_user.id }} ? 'sent' : 'received');
+        
+        const header = document.createElement('div');
+        header.className = 'message-header';
+        
+        const img = document.createElement('img');
+        img.src = message.profile_image_url || '/static/images/default.png';
+        img.alt = message.username;
+        img.onerror = function() {
+            this.src = '/static/images/default.png';
+        };
+        
+        const username = document.createElement('span');
+        username.className = 'message-username';
+        username.textContent = message.username || 'Bilinmiyor';
+        
+        const time = document.createElement('span');
+        time.className = 'message-time';
+        time.textContent = message.timestamp || new Date().toLocaleString();
+        
+        header.appendChild(img);
+        header.appendChild(username);
+        header.appendChild(time);
+        
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.textContent = message.content;
+        
+        messageDiv.appendChild(header);
+        messageDiv.appendChild(content);
+        messagesDiv.appendChild(messageDiv);
+    }
+
+    // Otomatik kaydırma
+    function scrollToBottom() {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Sayfa yüklendiğinde ilk grubu seç
+    const firstGroup = document.querySelector('.group-item');
+    if (firstGroup) {
+        firstGroup.click();
+    }
+
+    // Socket bağlantı durumu
+    socket.on('connect', () => {
+        console.log('Socket.IO bağlantısı kuruldu');
+        playSound('connect');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Socket.IO bağlantısı kesildi');
+        playSound('disconnect');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('Socket.IO bağlantı hatası:', error);
+    });
+});
+</script>
+{% endblock %}

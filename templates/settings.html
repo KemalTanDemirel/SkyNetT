@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Ayarlar</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mt-3">
+        <div class="card-header">
+            Tema Ayarları
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('settings') }}" method="POST">
+                <div class="mb-3">
+                    <label for="theme" class="form-label">Tema Seçimi:</label>
+                    <select class="form-select" id="theme" name="theme">
+                        <option value="light" {% if user.theme == 'light' %}selected{% endif %}>Aydınlık</option>
+                        <option value="dark" {% if user.theme == 'dark' %}selected{% endif %}>Karanlık</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">
+            Bildirim Ayarları
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('settings') }}" method="POST">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="message_notifications" name="message_notifications" {% if user.message_notifications %}checked{% endif %}>
+                    <label class="form-check-label" for="message_notifications">
+                        Mesaj Bildirimleri
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %} 

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        min-height: calc(100vh - 76px);
+        background-color: #1a1a1a;
+        color: white;
+        padding: 40px 0;
+    }
+    .profile-card {
+        background-color: #2d2d2d;
+        border: 1px solid #404040;
+        border-radius: 10px;
+        padding: 30px;
+    }
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .profile-image {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin-bottom: 20px;
+        object-fit: cover;
+        border: 3px solid #007bff;
+    }
+    .anonymous-profiles {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 20px 0;
+    }
+    .anonymous-profile-option {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    .anonymous-profile-option:hover {
+        transform: scale(1.1);
+    }
+    .anonymous-profile-option.selected {
+        border-color: #007bff;
+    }
+    .form-control {
+        background-color: #1a1a1a;
+        border: 1px solid #404040;
+        color: white;
+    }
+    .form-control:focus {
+        background-color: #1a1a1a;
+        border-color: #007bff;
+        color: white;
+        box-shadow: none;
+    }
+    .btn-save {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.1rem;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <img src="{{ user.profile_image_url or url_for('static', filename='images/default_profile.png') }}" 
+                             alt="Profile" class="profile-image">
+                        <h2>{{ user.username }}</h2>
+                        {% if user.role == 'admin' %}
+                        <span class="badge bg-danger">Admin</span>
+                        {% endif %}
+                    </div>
+
+                    <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Profile Image</label>
+                            <input type="file" class="form-control" name="profile_image" accept="image/*">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">About Me</label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      rows="3">{{ user.description or '' }}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-save">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </form>
+                    <hr>
+                    <h4>Kendi Emojilerim & Çıkartmalarım</h4>
+                    <form id="sticker-upload-form" enctype="multipart/form-data">
+                        <div class="mb-2">
+                            <input type="file" class="form-control" id="sticker-file" name="sticker" accept=".png,.jpg,.jpeg" required>
+                        </div>
+                        <div class="mb-2">
+                            <select class="form-select" id="sticker-type" name="type">
+                                <option value="emoji">Emoji</option>
+                                <option value="sticker">Çıkartma</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Yükle</button>
+                        <small class="form-text text-muted">Sadece PNG/JPG, max 1MB. En fazla 100 adet ekleyebilirsiniz.</small>
+                    </form>
+                    <div id="my-stickers-list" class="mt-3" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function fetchMyStickers() {
+    fetch('/my_stickers').then(r=>r.json()).then(data => {
+        const list = document.getElementById('my-stickers-list');
+        list.innerHTML = '';
+        data.stickers.forEach(sticker => {
+            const div = document.createElement('div');
+            div.style.position = 'relative';
+            div.innerHTML = `<img src="${sticker.file_url}" alt="${sticker.type}" style="width:48px;height:48px;border-radius:8px;background:#222;object-fit:contain;">` +
+                `<button onclick="deleteSticker(${sticker.id})" style="position:absolute;top:-8px;right:-8px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;">&times;</button>`;
+            list.appendChild(div);
+        });
+    });
+}
+function deleteSticker(id) {
+    if(!confirm('Silmek istediğinize emin misiniz?')) return;
+    fetch(`/delete_sticker/${id}`, {method:'POST'}).then(r=>r.json()).then(data=>{
+        if(data.success) fetchMyStickers();
+        else alert(data.error||'Silinemedi');
+    });
+}
+document.getElementById('sticker-upload-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const fd = new FormData(form);
+    fetch('/upload_sticker', {method:'POST', body:fd}).then(r=>r.json()).then(data=>{
+        if(data.success) {
+            fetchMyStickers();
+            form.reset();
+        } else {
+            alert(data.error||'Yüklenemedi');
+        }
+    });
+});
+document.addEventListener('DOMContentLoaded', fetchMyStickers);
+</script>
+{% endblock %} 

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKYNEX Gate</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+        .circle-logo {
+            width: 260px;
+            height: 260px;
+            border: 6px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            box-shadow: 0 0 30px #fff2, 0 0 10px #fff4 inset;
+            position: relative;
+        }
+        .circle-logo-text {
+            font-size: 2.5rem;
+            letter-spacing: 0.2em;
+            color: #fff;
+            text-shadow: 0 0 8px #fff, 0 0 2px #0ff, 0 0 2px #f0f;
+            font-family: 'Consolas', 'Courier New', monospace;
+            user-select: none;
+            text-rendering: optimizeLegibility;
+            image-rendering: pixelated;
+            background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3.5rem;
+            letter-spacing: 0.3em;
+            font-weight: bold;
+            text-shadow: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'VT323', monospace;
+            font-size: 4rem;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #fff;
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: unset;
+            text-shadow: 0 0 10px #fff;
+        }
+        .gate-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+        .gate-label {
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 2px;
+        }
+        .gate-input {
+            background: #111;
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 1.1rem;
+            outline: none;
+            width: 220px;
+            text-align: center;
+            transition: border 0.2s;
+        }
+        .gate-input:focus {
+            border: 2px solid #8B0000;
+        }
+        .gate-btn {
+            background: #111;
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            padding: 10px 40px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.1em;
+        }
+        .gate-btn:hover {
+            background: #8B0000;
+            border-color: #8B0000;
+        }
+        .gate-error {
+            color: #ff4444;
+            margin-top: 10px;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+        }
+        @media (max-width: 600px) {
+            .circle-logo-text {
+                font-size: 2.5rem;
+                letter-spacing: 0.3em;
+            }
+            .circle-logo {
+                width: 200px;
+                height: 200px;
+                border-width: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="SKYNEX Logo" style="width: 200px; height: auto; margin-bottom: 40px;">
+    <form class="gate-form" method="POST">
+        <label class="gate-label" for="password">PASSWORD:</label>
+        <input class="gate-input" type="password" id="password" name="password" autocomplete="off" autofocus required>
+        <button class="gate-btn" type="submit">ENTER</button>
+        {% if error %}
+        <div class="gate-error">{{ error }}</div>
+        {% endif %}
+    </form>
+</body>
+</html> 
