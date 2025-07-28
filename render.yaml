@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: skynet
+    name: skynet -flask
     env: python
     plan: free
     pythonVersion: 3.11.17
