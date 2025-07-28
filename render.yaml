@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: skynet-flask
+    name: skynet
     env: python
     plan: free
+    pythonVersion: 3.11.17
     buildCommand: "pip install -r requirements.txt"
     startCommand: "flask db upgrade && gunicorn app:app --worker-class eventlet"
     envVars:
